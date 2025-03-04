@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
-import { Download, FileCheck } from "lucide-react";
+import { Download, FileCheck, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import ColorSelector from "./ColorSelector";
 import FeedbackForm from "./FeedbackForm";
+import PaymentModal from "./PaymentModal";
 
 interface ContractData {
   contractType: string;
@@ -59,6 +60,7 @@ const getColorStyle = (colorKey: string) => {
 const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
   const [color, setColor] = useState<string>("default");
   const [hasDownloaded, setHasDownloaded] = useState<boolean>(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   
   const colorStyle = getColorStyle(color);
   
@@ -79,6 +81,16 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
   }
 
   const handleDownload = () => {
+    // For free version, directly download
+    if (color === "default") {
+      downloadContract();
+    } else {
+      // For premium versions, show payment modal first
+      setIsPaymentModalOpen(true);
+    }
+  };
+  
+  const downloadContract = () => {
     // In a real app, this would generate and download a PDF
     toast.success("Contrat téléchargé avec succès", {
       description: "Le contrat a été téléchargé au format PDF.",
@@ -91,9 +103,16 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
     toast.success("Couleur appliquée avec succès !");
   };
   
+  const handlePaymentSuccess = (optionId: string) => {
+    // Complete the download after payment
+    downloadContract();
+  };
+  
   const handleFeedbackSubmit = (data: { rating: number; comment: string }) => {
     console.log("Feedback submitted:", data);
-    // In a real app, this would send feedback to your backend
+    toast.success("Merci pour votre feedback !", {
+      description: "Votre avis nous aide à améliorer notre service."
+    });
   };
 
   return (
@@ -198,6 +217,12 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
           <FeedbackForm onFeedbackSubmit={handleFeedbackSubmit} />
         </div>
       )}
+      
+      <PaymentModal 
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };

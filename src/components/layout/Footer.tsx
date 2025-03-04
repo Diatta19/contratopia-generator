@@ -1,168 +1,94 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
-import { FileText, Github, Twitter, Facebook, Instagram, Linkedin, Mail, Phone } from "lucide-react";
+import { Facebook, Instagram, Twitter, Phone, Mail, MapPin } from "lucide-react";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="border-t pt-12 pb-8 bg-gray-50">
-      <div className="container mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          <div className="col-span-1 md:col-span-2">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-blue-600 font-medium mb-4"
-            >
-              <FileText className="w-5 h-5" />
-              <span className="text-lg font-medium">ContratPro</span>
-            </Link>
-            <p className="text-muted-foreground text-sm mb-4 max-w-md">
-              ContratPro simplifie la création de contrats professionnels avec une expérience utilisateur intuitive et des modèles juridiquement fiables.
+    <footer className="bg-gray-900 text-gray-300">
+      <div className="container mx-auto max-w-7xl px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-1">
+            <h2 className="text-white text-lg font-bold mb-4">ContratPro</h2>
+            <p className="text-sm mb-4">
+              La plateforme de référence pour la création de contrats professionnels sur mesure et juridiquement fiables.
             </p>
-            <div className="flex items-center gap-4">
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-blue-600 transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-4 h-4" />
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Facebook className="h-5 w-5" />
               </a>
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-blue-600 transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-4 h-4" />
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Instagram className="h-5 w-5" />
               </a>
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-blue-600 transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-blue-600 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-4 h-4" />
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Twitter className="h-5 w-5" />
               </a>
             </div>
           </div>
-
-          <div className="col-span-1">
-            <h3 className="text-sm font-medium mb-4">Navigation</h3>
-            <ul className="space-y-3">
+          
+          <div>
+            <h3 className="text-white font-semibold mb-4">Liens rapides</h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  to="/"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Accueil
-                </Link>
+                <Link to="/" className="hover:text-white transition-colors">Accueil</Link>
               </li>
               <li>
-                <Link
-                  to="/generate"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Créer un contrat
-                </Link>
+                <Link to="/generate" className="hover:text-white transition-colors">Créer un contrat</Link>
               </li>
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Modèles de contrats
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">Modèles</a>
               </li>
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Tarifs
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">Tarifs</a>
               </li>
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  FAQ
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">Blog juridique</a>
               </li>
             </ul>
           </div>
-
-          <div className="col-span-1">
-            <h3 className="text-sm font-medium mb-4">Légal</h3>
-            <ul className="space-y-3">
+          
+          <div>
+            <h3 className="text-white font-semibold mb-4">À propos</h3>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Mentions légales
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">Notre équipe</a>
               </li>
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Politique de confidentialité
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">Mentions légales</a>
               </li>
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Conditions d'utilisation
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">Politique de confidentialité</a>
               </li>
               <li>
-                <Link
-                  to="#"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors"
-                >
-                  Cookies
-                </Link>
+                <a href="#" className="hover:text-white transition-colors">CGU</a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">FAQ</a>
               </li>
             </ul>
           </div>
-
-          <div className="col-span-1">
-            <h3 className="text-sm font-medium mb-4">Contact</h3>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href="mailto:contact@contratpro.fr"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors flex items-center gap-2"
-                >
-                  <Mail className="w-4 h-4" />
-                  contact@contratpro.fr
-                </a>
+          
+          <div>
+            <h3 className="text-white font-semibold mb-4">Contact</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start">
+                <Phone className="h-5 w-5 mr-3 flex-shrink-0 text-gray-400" />
+                <span>+221 78 169 88 58</span>
               </li>
-              <li>
-                <a
-                  href="tel:+221781698858"
-                  className="text-sm text-muted-foreground hover:text-blue-600 transition-colors flex items-center gap-2"
-                >
-                  <Phone className="w-4 h-4" />
-                  +221 78 169 88 58
-                </a>
+              <li className="flex items-start">
+                <Mail className="h-5 w-5 mr-3 flex-shrink-0 text-gray-400" />
+                <span>contact@contratpro.com</span>
+              </li>
+              <li className="flex items-start">
+                <MapPin className="h-5 w-5 mr-3 flex-shrink-0 text-gray-400" />
+                <span>123 Avenue de la République, Dakar, Sénégal</span>
               </li>
             </ul>
           </div>
         </div>
-
-        <div className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
-          <p>© {currentYear} ContratPro. Tous droits réservés.</p>
+        
+        <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-gray-400 text-center">
+          <p>© {new Date().getFullYear()} ContratPro. Tous droits réservés.</p>
         </div>
       </div>
     </footer>
