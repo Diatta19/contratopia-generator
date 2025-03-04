@@ -33,10 +33,10 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <Link
             to="/"
-            className="flex items-center gap-2 text-primary font-medium"
+            className="flex items-center gap-2 text-blue-600 font-medium"
           >
             <FileText className="w-5 h-5" />
-            <span className="text-lg font-medium">Contratopia</span>
+            <span className="text-lg font-medium">ContratPro</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -53,7 +53,25 @@ const Header = () => {
             >
               Créer un contrat
             </Link>
-            <Button size="sm" variant="default" asChild>
+            <Link
+              to="#"
+              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+            >
+              Modèles
+            </Link>
+            <Link
+              to="#"
+              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+            >
+              Tarifs
+            </Link>
+            <Link
+              to="#"
+              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+            >
+              Contact
+            </Link>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" asChild>
               <Link to="/generate">Commencer</Link>
             </Button>
           </nav>
@@ -83,19 +101,40 @@ const Header = () => {
         <div className="container mx-auto p-6 flex flex-col gap-6 text-center">
           <Link
             to="/"
-            className="py-3 text-foreground hover:text-primary transition-colors text-lg"
+            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Accueil
           </Link>
           <Link
             to="/generate"
-            className="py-3 text-foreground hover:text-primary transition-colors text-lg"
+            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Créer un contrat
           </Link>
-          <Button className="mt-4" asChild>
+          <Link
+            to="#"
+            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Modèles
+          </Link>
+          <Link
+            to="#"
+            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Tarifs
+          </Link>
+          <Link
+            to="#"
+            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Contact
+          </Link>
+          <Button className="mt-4 bg-blue-600 hover:bg-blue-700" asChild>
             <Link to="/generate" onClick={() => setIsMobileMenuOpen(false)}>
               Commencer
             </Link>
