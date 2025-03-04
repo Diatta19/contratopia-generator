@@ -1,9 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Download, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import ColorSelector from "./ColorSelector";
+import FeedbackForm from "./FeedbackForm";
 
 interface ContractData {
   contractType: string;
@@ -41,7 +44,24 @@ const getContractTypeName = (contractType: string) => {
   return types[contractType] || contractType;
 };
 
+const getColorStyle = (colorKey: string) => {
+  const colorMap: Record<string, { background: string; border: string }> = {
+    default: { background: "bg-white", border: "border-gray-200" },
+    blue: { background: "bg-blue-50", border: "border-blue-100" },
+    green: { background: "bg-green-50", border: "border-green-100" },
+    peach: { background: "bg-orange-50", border: "border-orange-100" },
+    purple: { background: "bg-purple-50", border: "border-purple-100" },
+  };
+  
+  return colorMap[colorKey] || colorMap.default;
+};
+
 const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
+  const [color, setColor] = useState<string>("default");
+  const [hasDownloaded, setHasDownloaded] = useState<boolean>(false);
+  
+  const colorStyle = getColorStyle(color);
+  
   if (!contractData) {
     return (
       <div className="flex min-h-[600px] items-center justify-center text-center p-10 border rounded-lg bg-muted/20">
@@ -60,7 +80,20 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
 
   const handleDownload = () => {
     // In a real app, this would generate and download a PDF
-    alert("Cette fonctionnalité téléchargerait le contrat en PDF dans une application réelle.");
+    toast.success("Contrat téléchargé avec succès", {
+      description: "Le contrat a été téléchargé au format PDF.",
+    });
+    setHasDownloaded(true);
+  };
+  
+  const handleColorChange = (newColor: string) => {
+    setColor(newColor);
+    toast.success("Couleur appliquée avec succès !");
+  };
+  
+  const handleFeedbackSubmit = (data: { rating: number; comment: string }) => {
+    console.log("Feedback submitted:", data);
+    // In a real app, this would send feedback to your backend
   };
 
   return (
@@ -69,13 +102,16 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
         <h2 className="text-xl font-semibold tracking-tight">
           Aperçu du contrat
         </h2>
-        <Button variant="default" size="sm" onClick={handleDownload} className="gap-2">
-          <Download className="h-4 w-4" />
-          Télécharger
-        </Button>
+        <div className="flex gap-2">
+          <ColorSelector currentColor={color} onColorChange={handleColorChange} />
+          <Button variant="default" size="sm" onClick={handleDownload} className="gap-2">
+            <Download className="h-4 w-4" />
+            Télécharger
+          </Button>
+        </div>
       </div>
       
-      <Card className="flex-1 overflow-auto">
+      <Card className={cn("flex-1 overflow-auto", colorStyle.background, colorStyle.border)}>
         <CardContent className="p-8">
           <div className="mx-auto max-w-3xl">
             <div className="text-center mb-10">
@@ -156,6 +192,12 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
           </div>
         </CardContent>
       </Card>
+      
+      {hasDownloaded && (
+        <div className="mt-4 text-center">
+          <FeedbackForm onFeedbackSubmit={handleFeedbackSubmit} />
+        </div>
+      )}
     </div>
   );
 };

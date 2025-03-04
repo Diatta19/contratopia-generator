@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
+import { Toaster } from "sonner";
 
 interface ContractData {
   contractType: string;
@@ -60,6 +61,7 @@ const Generate = () => {
       </main>
       
       <Footer />
+      <Toaster />
     </div>
   );
 };
