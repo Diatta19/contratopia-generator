@@ -5,6 +5,10 @@ import Footer from "@/components/layout/Footer";
 import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
 import { Toaster } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthModal from "@/components/auth/AuthModal";
+import { Button } from "@/components/ui/button";
+import { UserCircle } from "lucide-react";
 
 interface ContractData {
   contractType: string;
@@ -20,6 +24,8 @@ interface ContractData {
 
 const Generate = () => {
   const [contractData, setContractData] = useState<ContractData | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleFormSubmit = (data: ContractData) => {
     setContractData(data);
@@ -39,10 +45,24 @@ const Generate = () => {
       
       <main className="flex-1 pt-24 pb-16">
         <div className="container mx-auto max-w-7xl px-6 py-8">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold tracking-tight mb-3">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">
               Générez votre contrat
             </h1>
+            
+            {currentUser ? (
+              <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full">
+                <UserCircle className="h-5 w-5" />
+                <span className="text-sm font-medium">{currentUser.email}</span>
+              </div>
+            ) : (
+              <Button onClick={() => setShowAuthModal(true)}>
+                Connexion / Inscription
+              </Button>
+            )}
+          </div>
+          
+          <div className="text-center mb-12">
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Remplissez le formulaire ci-dessous pour créer votre contrat personnalisé. Un aperçu sera généré automatiquement.
             </p>
@@ -62,6 +82,7 @@ const Generate = () => {
       
       <Footer />
       <Toaster />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   );
 };

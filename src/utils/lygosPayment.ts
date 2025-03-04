@@ -7,6 +7,7 @@ export interface PaymentOptions {
   description: string;
   currency?: string;
   customerPhone?: string;
+  paymentMethod?: string;
 }
 
 export const initiatePayment = async (options: PaymentOptions): Promise<{ success: boolean; transactionId?: string; error?: string }> => {
@@ -15,6 +16,8 @@ export const initiatePayment = async (options: PaymentOptions): Promise<{ succes
     // For now, we'll simulate a successful payment flow
     console.log(`Payment initiated: ${options.amount} ${options.currency || 'FCF'} - ${options.description}`);
     console.log(`Using Lygos API key: ${LYGOS_API_KEY}`);
+    console.log(`Customer phone: ${options.customerPhone || 'Not provided'}`);
+    console.log(`Payment method: ${options.paymentMethod || 'Default'}`);
     
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -40,4 +43,12 @@ export const verifyPayment = async (transactionId: string): Promise<boolean> => 
   await new Promise(resolve => setTimeout(resolve, 800));
   
   return true; // Assume verification is successful
+};
+
+export const getAvailablePaymentMethods = () => {
+  return [
+    { id: "mobile-money", name: "Mobile Money" },
+    { id: "card", name: "Carte Bancaire" },
+    { id: "wallet", name: "Portefeuille Électronique" }
+  ];
 };
