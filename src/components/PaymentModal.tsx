@@ -31,10 +31,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("mobile-money");
+  const [selectedMobileProvider, setSelectedMobileProvider] = useState<string>("orange");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [step, setStep] = useState(1);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [paymentCode, setPaymentCode] = useState("");
   
   const { currentUser } = useAuth();
 
@@ -44,6 +46,26 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   
   const handlePaymentMethodSelect = (id: string) => {
     setSelectedPaymentMethod(id);
+  };
+
+  // Déterminer si on doit afficher l'input de code de paiement
+  const shouldShowPaymentCodeInput = () => {
+    if (selectedPaymentMethod !== "mobile-money") return false;
+    
+    // Vérifier le mobile provider à partir de l'étape de paiement
+    return selectedMobileProvider === "orange" || 
+           selectedMobileProvider === "free" || 
+           selectedMobileProvider === "mtn";
+  };
+
+  // Récupérer le provider mobile
+  const handleMobileProviderChange = (provider: string) => {
+    setSelectedMobileProvider(provider);
+  };
+
+  // Gérer le changement de code de paiement
+  const handlePaymentCodeChange = (code: string) => {
+    setPaymentCode(code);
   };
 
   const proceedToPayment = () => {
@@ -68,6 +90,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       return;
     }
 
+    // Vérifier si un code de paiement est requis mais non fourni
+    if (shouldShowPaymentCodeInput() && !paymentCode) {
+      toast.error("Veuillez entrer le code de paiement temporaire");
+      return;
+    }
+
     const selectedPaymentOption = paymentOptions.find(option => option.id === selectedOption);
     if (!selectedPaymentOption) return;
 
@@ -79,7 +107,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       state: {
         method: selectedPaymentMethod,
         amount: selectedPaymentOption.price,
-        paymentOption: selectedOption
+        paymentOption: selectedOption,
+        mobileProvider: selectedMobileProvider,
+        paymentCode: paymentCode
       }
     });
   };
@@ -88,6 +118,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     setStep(1);
     setSelectedOption(null);
     setSelectedPaymentMethod("mobile-money");
+    setSelectedMobileProvider("orange");
+    setPaymentCode("");
   };
 
   // When modal is closed, reset the form
@@ -149,6 +181,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           methods={paymentMethods}
           selectedMethod={selectedPaymentMethod}
           onMethodSelect={handlePaymentMethodSelect}
+          showPaymentCodeInput={shouldShowPaymentCodeInput()}
+          paymentCodeProvider={selectedMobileProvider}
+          paymentCode={paymentCode}
+          onPaymentCodeChange={handlePaymentCodeChange}
         />
         
         <div className="flex justify-between gap-3 mt-4">
@@ -157,7 +193,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </Button>
           <Button 
             onClick={handlePaymentSubmit} 
-            disabled={!selectedPaymentMethod}
+            disabled={!selectedPaymentMethod || (shouldShowPaymentCodeInput() && !paymentCode)}
           >
             Continuer
           </Button>

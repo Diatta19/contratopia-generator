@@ -6,12 +6,14 @@ interface PaymentStatusProps {
   isProcessing: boolean;
   isComplete: boolean;
   error?: string | null;
+  pendingAuthCode?: boolean;
 }
 
 const PaymentStatus: React.FC<PaymentStatusProps> = ({ 
   isProcessing, 
   isComplete,
-  error = null
+  error = null,
+  pendingAuthCode = false
 }) => {
   if (error) {
     return (
@@ -33,6 +35,18 @@ const PaymentStatus: React.FC<PaymentStatusProps> = ({
         </div>
         <h3 className="text-lg font-medium mb-2">Paiement réussi !</h3>
         <p className="text-muted-foreground">Votre option premium est maintenant activée.</p>
+      </div>
+    );
+  }
+  
+  if (pendingAuthCode) {
+    return (
+      <div className="py-8 text-center">
+        <div className="mx-auto w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-4">
+          <AlertCircle className="h-6 w-6" />
+        </div>
+        <h3 className="text-lg font-medium mb-2">Code d'autorisation requis</h3>
+        <p className="text-muted-foreground">Veuillez générer et saisir le code temporaire pour confirmer votre paiement.</p>
       </div>
     );
   }
