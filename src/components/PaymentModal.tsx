@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from "react";
-import { Check, Loader2, CreditCard, Smartphone, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,77 +10,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
-
-interface PaymentOption {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  color?: string;
-}
-
-interface PaymentMethod {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-}
-
-const paymentOptions: PaymentOption[] = [
-  { 
-    id: "color-blue", 
-    name: "Thème Bleu Professionnel", 
-    description: "Donnez à votre contrat un aspect professionnel avec cette teinte bleue élégante", 
-    price: 200,
-    color: "#D3E4FD" 
-  },
-  { 
-    id: "color-green", 
-    name: "Thème Vert Élégant", 
-    description: "Un style vert doux pour vos contrats liés à l'environnement ou la santé", 
-    price: 200,
-    color: "#F2FCE2" 
-  },
-  { 
-    id: "color-peach", 
-    name: "Thème Pêche Premium", 
-    description: "Une teinte chaleureuse et accueillante pour vos contrats", 
-    price: 200,
-    color: "#FDE1D3" 
-  },
-  { 
-    id: "color-purple", 
-    name: "Thème Violet Distinctif", 
-    description: "Un style unique et mémorable pour vos contrats importants", 
-    price: 200,
-    color: "#E5DEFF" 
-  },
-];
-
-const paymentMethods: PaymentMethod[] = [
-  {
-    id: "mobile-money",
-    name: "Mobile Money",
-    description: "Paiement via Orange Money, Wave, ou Free Money",
-    icon: <Smartphone className="h-5 w-5" />
-  },
-  {
-    id: "card",
-    name: "Carte Bancaire",
-    description: "Paiement sécurisé par carte bancaire",
-    icon: <CreditCard className="h-5 w-5" />
-  },
-  {
-    id: "wallet",
-    name: "Portefeuille Électronique",
-    description: "PayPal, Skrill ou autre portefeuille électronique",
-    icon: <Wallet className="h-5 w-5" />
-  }
-];
+import PaymentOptionList from "@/components/payment/PaymentOptionList";
+import PaymentMethodList from "@/components/payment/PaymentMethodList";
+import PaymentStatus from "@/components/payment/PaymentStatus";
+import { paymentOptions, paymentMethods } from "@/data/paymentOptions";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -182,6 +117,55 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [onPaymentSuccess]);
 
+  const renderContent = () => {
+    if (isProcessing || isComplete) {
+      return <PaymentStatus isProcessing={isProcessing} isComplete={isComplete} />;
+    }
+
+    if (step === 1) {
+      return (
+        <>
+          <PaymentOptionList 
+            options={paymentOptions}
+            selectedOption={selectedOption}
+            onOptionSelect={handleOptionSelect}
+          />
+          
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button onClick={proceedToPayment} disabled={!selectedOption}>
+              Procéder au paiement
+            </Button>
+          </div>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <PaymentMethodList 
+          methods={paymentMethods}
+          selectedMethod={selectedPaymentMethod}
+          onMethodSelect={handlePaymentMethodSelect}
+        />
+        
+        <div className="flex justify-between gap-3 mt-4">
+          <Button variant="outline" onClick={() => setStep(1)}>
+            Retour
+          </Button>
+          <Button 
+            onClick={handlePaymentSubmit} 
+            disabled={!selectedPaymentMethod}
+          >
+            Continuer
+          </Button>
+        </div>
+      </>
+    );
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -193,94 +177,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             </DialogDescription>
           </DialogHeader>
           
-          {!isProcessing && !isComplete ? (
-            step === 1 ? (
-              <>
-                <div className="py-4">
-                  <h3 className="text-sm font-medium mb-3">Sélectionnez une option :</h3>
-                  <RadioGroup value={selectedOption || ""} onValueChange={handleOptionSelect}>
-                    {paymentOptions.map((option) => (
-                      <div
-                        key={option.id}
-                        className="flex items-center space-x-2 mb-4 p-3 border rounded-md hover:bg-gray-50"
-                      >
-                        <RadioGroupItem value={option.id} id={option.id} />
-                        <Label htmlFor={option.id} className="flex-1 cursor-pointer">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-6 h-6 rounded border" 
-                              style={{ backgroundColor: option.color }}
-                            />
-                            <span className="font-medium">{option.name}</span>
-                            <span className="ml-auto text-sm font-semibold text-blue-600">{option.price} FCF</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-                
-                <div className="flex justify-end gap-3 mt-4">
-                  <Button variant="outline" onClick={onClose}>
-                    Annuler
-                  </Button>
-                  <Button onClick={proceedToPayment} disabled={!selectedOption}>
-                    Procéder au paiement
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="py-4">
-                  <h3 className="text-sm font-medium mb-3">Choisissez votre mode de paiement :</h3>
-                  <RadioGroup value={selectedPaymentMethod} onValueChange={handlePaymentMethodSelect}>
-                    {paymentMethods.map((method) => (
-                      <div
-                        key={method.id}
-                        className="flex items-center space-x-2 mb-4 p-3 border rounded-md hover:bg-gray-50"
-                      >
-                        <RadioGroupItem value={method.id} id={method.id} />
-                        <Label htmlFor={method.id} className="flex-1 cursor-pointer">
-                          <div className="flex items-center gap-2">
-                            {method.icon}
-                            <span className="font-medium">{method.name}</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">{method.description}</p>
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-                
-                <div className="flex justify-between gap-3 mt-4">
-                  <Button variant="outline" onClick={() => setStep(1)}>
-                    Retour
-                  </Button>
-                  <Button 
-                    onClick={handlePaymentSubmit} 
-                    disabled={!selectedPaymentMethod}
-                  >
-                    Continuer
-                  </Button>
-                </div>
-              </>
-            )
-          ) : isComplete ? (
-            <div className="py-8 text-center">
-              <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-4">
-                <Check className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Paiement réussi !</h3>
-              <p className="text-muted-foreground">Votre option premium est maintenant activée.</p>
-            </div>
-          ) : (
-            <div className="py-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Traitement du paiement...</h3>
-              <p className="text-muted-foreground">Veuillez patienter pendant que nous traitons votre paiement.</p>
-            </div>
-          )}
+          {renderContent()}
         </DialogContent>
       </Dialog>
       

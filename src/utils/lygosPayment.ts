@@ -8,6 +8,13 @@ export interface PaymentOptions {
   currency?: string;
   customerPhone?: string;
   paymentMethod?: string;
+  provider?: string;
+  cardDetails?: {
+    number: string;
+    expiry: string;
+    cvv: string;
+  };
+  email?: string;
 }
 
 export const initiatePayment = async (options: PaymentOptions): Promise<{ success: boolean; transactionId?: string; error?: string }> => {
