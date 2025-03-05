@@ -1,7 +1,7 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Check, Loader2, CreditCard, Smartphone, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { initiatePayment, verifyPayment } from "@/utils/lygosPayment";
-import { PhoneInput } from "@/components/ui/phone-input";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
 
@@ -95,11 +93,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose, 
   onPaymentSuccess 
 }) => {
+  const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("mobile-money");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [step, setStep] = useState(1);
   const [showAuthModal, setShowAuthModal] = useState(false);
   
@@ -129,71 +127,60 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     setStep(2);
   };
 
-  const handlePaymentSubmit = async () => {
+  const handlePaymentSubmit = () => {
     if (!selectedOption || !selectedPaymentMethod) {
       toast.error("Veuillez sélectionner une option et un mode de paiement");
-      return;
-    }
-
-    if (selectedPaymentMethod === "mobile-money" && !phoneNumber.trim()) {
-      toast.error("Veuillez saisir votre numéro de téléphone");
       return;
     }
 
     const selectedPaymentOption = paymentOptions.find(option => option.id === selectedOption);
     if (!selectedPaymentOption) return;
 
-    setIsProcessing(true);
-
-    try {
-      const paymentResult = await initiatePayment({
+    // Close the modal
+    onClose();
+    
+    // Navigate to payment details page with payment information
+    navigate("/payment-details", {
+      state: {
+        method: selectedPaymentMethod,
         amount: selectedPaymentOption.price,
-        description: `ContratPro - ${selectedPaymentOption.name}`,
-        customerPhone: phoneNumber,
-        currency: "FCF"
-      });
-
-      if (paymentResult.success) {
-        const verified = await verifyPayment(paymentResult.transactionId || "");
-        
-        if (verified) {
-          setIsComplete(true);
-          setTimeout(() => {
-            onPaymentSuccess(selectedOption);
-            toast.success("Paiement réussi !");
-            setIsProcessing(false);
-            setIsComplete(false);
-            setStep(1);
-            onClose();
-          }, 1500);
-        } else {
-          toast.error("La vérification du paiement a échoué");
-          setIsProcessing(false);
-        }
-      } else {
-        toast.error(paymentResult.error || "Le paiement a échoué");
-        setIsProcessing(false);
+        paymentOption: selectedOption
       }
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast.error("Une erreur est survenue lors du paiement");
-      setIsProcessing(false);
-    }
+    });
   };
   
   const resetModal = () => {
     setStep(1);
     setSelectedOption(null);
     setSelectedPaymentMethod("mobile-money");
-    setPhoneNumber("");
   };
 
   // When modal is closed, reset the form
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen) {
       resetModal();
     }
   }, [isOpen]);
+
+  // Handle payment success from other components
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const paymentSuccess = sessionStorage.getItem('paymentSuccess');
+      const paymentOption = sessionStorage.getItem('paymentOption');
+      
+      if (paymentSuccess && paymentOption) {
+        // Clear storage
+        sessionStorage.removeItem('paymentSuccess');
+        sessionStorage.removeItem('paymentOption');
+        
+        // Call success callback
+        onPaymentSuccess(paymentOption);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [onPaymentSuccess]);
 
   return (
     <>
@@ -266,32 +253,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   </RadioGroup>
                 </div>
                 
-                {selectedPaymentMethod === "mobile-money" && (
-                  <div className="space-y-3">
-                    <PhoneInput
-                      label="Numéro de téléphone pour le paiement"
-                      value={phoneNumber}
-                      onChange={setPhoneNumber}
-                      placeholder="Votre numéro de téléphone"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Le paiement sera traité via Lygos sur ce numéro
-                    </p>
-                  </div>
-                )}
-                
                 <div className="flex justify-between gap-3 mt-4">
                   <Button variant="outline" onClick={() => setStep(1)}>
                     Retour
                   </Button>
                   <Button 
                     onClick={handlePaymentSubmit} 
-                    disabled={
-                      !selectedPaymentMethod || 
-                      (selectedPaymentMethod === "mobile-money" && !phoneNumber.trim())
-                    }
+                    disabled={!selectedPaymentMethod}
                   >
-                    Payer {paymentOptions.find(o => o.id === selectedOption)?.price} FCF
+                    Continuer
                   </Button>
                 </div>
               </>

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Generate from "./pages/Generate";
 import NotFound from "./pages/NotFound";
+import PaymentDetails from "./pages/PaymentDetails";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/generate" element={<Generate />} />
+          <Route path="/payment-details" element={<PaymentDetails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,5 +1,6 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ContractForm from "@/components/ContractForm";
@@ -26,6 +27,23 @@ const Generate = () => {
   const [contractData, setContractData] = useState<ContractData | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { currentUser } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check if returning from payment with success
+    const state = location.state as any;
+    if (state?.paymentSuccess && state?.selectedOption) {
+      // Store in sessionStorage to be picked up by PaymentModal
+      sessionStorage.setItem('paymentSuccess', 'true');
+      sessionStorage.setItem('paymentOption', state.selectedOption);
+      
+      // Trigger storage event for PaymentModal to detect
+      window.dispatchEvent(new Event('storage'));
+      
+      // Clear location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleFormSubmit = (data: ContractData) => {
     setContractData(data);
