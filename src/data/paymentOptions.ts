@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Smartphone, CreditCard, Wallet } from "lucide-react";
 
 export interface PaymentOption {
@@ -66,4 +67,19 @@ export const paymentMethods: PaymentMethod[] = [
     description: "PayPal, Skrill ou autre portefeuille électronique",
     icon: <Wallet className="h-5 w-5" />
   }
+];
+
+export const currencies = [
+  { id: "fcf", name: "Franc CFA (FCFA)", symbol: "FCFA" },
+  { id: "eur", name: "Euro (€)", symbol: "€" },
+  { id: "usd", name: "Dollar US ($)", symbol: "$" },
+  { id: "gbp", name: "Livre Sterling (£)", symbol: "£" },
+  { id: "mad", name: "Dirham Marocain (MAD)", symbol: "MAD" },
+  { id: "dzd", name: "Dinar Algérien (DZD)", symbol: "DZD" },
+  { id: "tnd", name: "Dinar Tunisien (TND)", symbol: "TND" },
+  { id: "kes", name: "Shilling Kényan (KES)", symbol: "KES" },
+  { id: "ngn", name: "Naira Nigérian (₦)", symbol: "₦" },
+  { id: "zar", name: "Rand Sud-Africain (R)", symbol: "R" },
+  { id: "cad", name: "Dollar Canadien (CA$)", symbol: "CA$" },
+  { id: "chf", name: "Franc Suisse (CHF)", symbol: "CHF" },
 ];

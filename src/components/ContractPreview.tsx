@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Download, FileCheck, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { toast } from "sonner";
 import ColorSelector from "./ColorSelector";
 import FeedbackForm from "./FeedbackForm";
 import PaymentModal from "./PaymentModal";
+import { currencies } from "@/data/paymentOptions";
 
 interface ContractData {
   contractType: string;
@@ -17,6 +17,7 @@ interface ContractData {
   providerAddress: string;
   projectDescription: string;
   contractAmount: string;
+  currency: string;
   startDate: string;
   endDate: string;
 }
@@ -41,8 +42,15 @@ const getContractTypeName = (contractType: string) => {
     workContract: "Contrat de travail",
     nda: "Accord de confidentialité",
     saleContract: "Contrat de vente",
+    rentalContract: "Contrat de location",
+    partnershipContract: "Contrat de partenariat",
   };
   return types[contractType] || contractType;
+};
+
+const getCurrencySymbol = (currencyId: string) => {
+  const currency = currencies.find(c => c.id === currencyId);
+  return currency ? currency.symbol : currencyId.toUpperCase();
 };
 
 const getColorStyle = (colorKey: string) => {
@@ -81,17 +89,14 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
   }
 
   const handleDownload = () => {
-    // For free version, directly download
     if (color === "default") {
       downloadContract();
     } else {
-      // For premium versions, show payment modal first
       setIsPaymentModalOpen(true);
     }
   };
   
   const downloadContract = () => {
-    // In a real app, this would generate and download a PDF
     toast.success("Contrat téléchargé avec succès", {
       description: "Le contrat a été téléchargé au format PDF.",
     });
@@ -104,7 +109,6 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
   };
   
   const handlePaymentSuccess = (optionId: string) => {
-    // Complete the download after payment
     downloadContract();
   };
   
@@ -113,6 +117,49 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
     toast.success("Merci pour votre feedback !", {
       description: "Votre avis nous aide à améliorer notre service."
     });
+  };
+
+  const renderContractSpecificSections = () => {
+    switch (contractData.contractType) {
+      case "rentalContract":
+        return (
+          <div className="space-y-4">
+            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Conditions spécifiques à la location</h2>
+            <p className="text-sm leading-relaxed">
+              Le locataire s'engage à utiliser le bien loué conformément à sa destination et à le restituer dans l'état où il l'a reçu. 
+              Un état des lieux sera effectué à l'entrée et à la sortie du bien.
+            </p>
+            <p className="text-sm leading-relaxed">
+              Le locataire s'engage à verser une caution de {parseInt(contractData.contractAmount) * 0.3} {getCurrencySymbol(contractData.currency)} 
+              qui lui sera restituée à la fin du contrat, déduction faite des éventuels dommages constatés.
+            </p>
+          </div>
+        );
+      case "partnershipContract":
+        return (
+          <div className="space-y-4">
+            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Modalités du partenariat</h2>
+            <p className="text-sm leading-relaxed">
+              Les parties s'engagent à collaborer de bonne foi à la réalisation des objectifs communs définis dans ce contrat.
+              Chaque partie conserve son indépendance juridique et assume ses propres obligations légales et fiscales.
+            </p>
+            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground mt-4">Article 5 - Propriété intellectuelle</h2>
+            <p className="text-sm leading-relaxed">
+              Chaque partie reste propriétaire de ses droits de propriété intellectuelle. Les créations communes feront l'objet 
+              d'une copropriété selon la contribution de chaque partie.
+            </p>
+          </div>
+        );
+      default:
+        return (
+          <div className="space-y-4">
+            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Conditions de paiement</h2>
+            <p className="text-sm leading-relaxed">
+              Le paiement s'effectuera selon les modalités suivantes : 30% à la signature du contrat, 70% à la livraison.
+            </p>
+          </div>
+        );
+    }
   };
 
   return (
@@ -179,16 +226,11 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
               <div className="space-y-4">
                 <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 3 - Rémunération</h2>
                 <p className="text-sm leading-relaxed">
-                  En contrepartie des prestations définies à l'article 1, le client versera au prestataire la somme de {contractData.contractAmount} euros.
+                  En contrepartie des prestations définies à l'article 1, le client versera au prestataire la somme de {contractData.contractAmount} {getCurrencySymbol(contractData.currency)}.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Conditions de paiement</h2>
-                <p className="text-sm leading-relaxed">
-                  Le paiement s'effectuera selon les modalités suivantes : 30% à la signature du contrat, 70% à la livraison.
-                </p>
-              </div>
+              {renderContractSpecificSections()}
 
               <div className="mt-12 pt-8 border-t">
                 <p className="text-sm text-muted-foreground mb-10">

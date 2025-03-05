@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -22,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { currencies } from "@/data/paymentOptions";
 
 const contractFormSchema = z.object({
   contractType: z.string({
@@ -44,6 +44,9 @@ const contractFormSchema = z.object({
   }),
   contractAmount: z.string().refine((val) => !isNaN(Number(val)), {
     message: "Le montant doit être un nombre valide",
+  }),
+  currency: z.string({
+    required_error: "Veuillez sélectionner une devise",
   }),
   startDate: z.string(),
   endDate: z.string(),
@@ -68,6 +71,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
       providerAddress: "",
       projectDescription: "",
       contractAmount: "",
+      currency: "fcf",
       startDate: "",
       endDate: "",
     },
@@ -113,6 +117,8 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
                       <SelectItem value="workContract">Contrat de travail</SelectItem>
                       <SelectItem value="nda">Accord de confidentialité</SelectItem>
                       <SelectItem value="saleContract">Contrat de vente</SelectItem>
+                      <SelectItem value="rentalContract">Contrat de location</SelectItem>
+                      <SelectItem value="partnershipContract">Contrat de partenariat</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -240,19 +246,45 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="contractAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Montant du contrat (€)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Montant en euros" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="contractAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Montant du contrat</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Montant" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Devise</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une devise" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies.map((currency) => (
+                          <SelectItem key={currency.id} value={currency.id}>
+                            {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
 

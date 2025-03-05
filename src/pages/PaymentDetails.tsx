@@ -13,6 +13,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { useForm } from "react-hook-form";
 import { initiatePayment, verifyPayment } from "@/utils/lygosPayment";
 import { useAuth } from "@/contexts/AuthContext";
+import { currencies } from "@/data/paymentOptions";
 
 interface PaymentDetailsProps {}
 
@@ -24,7 +25,9 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
   const [paymentCode, setPaymentCode] = useState("");
   
   // Get payment data from location state
-  const { method, amount, paymentOption } = location.state || {};
+  const { method, amount, paymentOption, currency = "fcf" } = location.state || {};
+  
+  const currencySymbol = currencies.find(c => c.id === currency)?.symbol || currency.toUpperCase();
   
   useEffect(() => {
     if (!method || !amount || !paymentOption) {
@@ -58,7 +61,7 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
       let paymentData = {
         amount,
         description: `ContratPro - ${paymentOption}`,
-        currency: "FCF",
+        currency,
         paymentMethod: method
       };
       
@@ -374,7 +377,7 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
           <CardHeader>
             <CardTitle>Paiement par {getMethodTitle()}</CardTitle>
             <CardDescription>
-              Complétez vos informations pour finaliser votre paiement de {amount} FCF
+              Complétez vos informations pour finaliser votre paiement de {amount} {currencySymbol}
             </CardDescription>
           </CardHeader>
           <CardContent>
