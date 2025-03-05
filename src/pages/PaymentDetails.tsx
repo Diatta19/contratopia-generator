@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, LoaderCircle } from "lucide-react";
+import { ArrowLeft, LoaderCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -23,11 +23,13 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
   const { currentUser } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentCode, setPaymentCode] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   
-  // Get payment data from location state
   const { method, amount, paymentOption, currency = "fcf" } = location.state || {};
   
   const currencySymbol = currencies.find(c => c.id === currency)?.symbol || currency.toUpperCase();
+  const currencyCode = currencies.find(c => c.id === currency)?.code || currency.toUpperCase();
   
   useEffect(() => {
     if (!method || !amount || !paymentOption) {
@@ -53,19 +55,19 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
     }
   });
   
-  // Handle form submission based on payment method
   const onSubmit = async (data: any) => {
     setIsProcessing(true);
+    setPaymentStatus('processing');
+    setPaymentError(null);
     
     try {
       let paymentData = {
         amount,
         description: `ContratPro - ${paymentOption}`,
-        currency,
+        currency: currencyCode,
         paymentMethod: method
       };
       
-      // Add method-specific data
       if (method === "mobile-money") {
         paymentData = {
           ...paymentData,
@@ -73,7 +75,6 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
           provider: data.mobileProvider
         };
         
-        // Generate USSD code for Orange Money
         if (data.mobileProvider === "orange") {
           setPaymentCode("#144*391#");
         } else if (data.mobileProvider === "free") {
@@ -85,7 +86,7 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
         paymentData = {
           ...paymentData,
           cardDetails: {
-            number: data.cardNumber,
+            number: data.cardNumber.replace(/\s/g, ''),
             expiry: data.cardExpiry,
             cvv: data.cvv
           }
@@ -101,31 +102,39 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
       const paymentResult = await initiatePayment(paymentData as any);
       
       if (paymentResult.success) {
-        // For Wave, redirect to app
         if (method === "mobile-money" && data.mobileProvider === "wave") {
           window.location.href = `wave://payment?phone=${data.phoneNumber}&amount=${amount}`;
           return;
         }
         
-        // Check payment status
         const verified = await verifyPayment(paymentResult.transactionId || "");
         
         if (verified) {
+          setPaymentStatus('success');
           toast.success("Paiement réussi !");
-          navigate("/generate", { 
-            state: { 
-              paymentSuccess: true, 
-              selectedOption: paymentOption 
-            } 
-          });
+          
+          sessionStorage.setItem('paymentSuccess', 'true');
+          sessionStorage.setItem('paymentOption', paymentOption);
+          
+          window.dispatchEvent(new Event('storage'));
+          
+          setTimeout(() => {
+            navigate("/generate");
+          }, 1500);
         } else {
+          setPaymentStatus('error');
+          setPaymentError("La vérification du paiement a échoué");
           toast.error("La vérification du paiement a échoué");
         }
       } else {
+        setPaymentStatus('error');
+        setPaymentError(paymentResult.error || "Le paiement a échoué");
         toast.error(paymentResult.error || "Le paiement a échoué");
       }
     } catch (error) {
       console.error("Payment error:", error);
+      setPaymentStatus('error');
+      setPaymentError("Une erreur est survenue lors du paiement");
       toast.error("Une erreur est survenue lors du paiement");
     } finally {
       setIsProcessing(false);
@@ -217,8 +226,7 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
                       placeholder="1234 5678 9012 3456" 
                       maxLength={19}
                       onChange={(e) => {
-                        // Format card number with spaces
-                        const value = e.target.value.replace(/\s/g, "");
+                        const value = e.target.value.replace(/\s/g, '');
                         const formattedValue = value
                           .replace(/\D/g, "")
                           .replace(/(\d{4})/g, "$1 ")
@@ -245,7 +253,6 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
                         placeholder="MM/YY" 
                         maxLength={5} 
                         onChange={(e) => {
-                          // Format expiry date
                           const value = e.target.value.replace(/\D/g, "");
                           if (value.length <= 2) {
                             field.onChange(value);
@@ -275,7 +282,6 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
                         placeholder="123" 
                         maxLength={3}
                         onChange={(e) => {
-                          // Allow only numbers
                           const value = e.target.value.replace(/\D/g, "");
                           field.onChange(value);
                         }}
@@ -381,6 +387,15 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {paymentStatus === 'error' && paymentError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {paymentError}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {renderPaymentForm()}
@@ -388,11 +403,11 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = () => {
                 <CardFooter className="flex justify-end px-0 pt-4">
                   <Button 
                     type="submit" 
-                    disabled={isProcessing}
+                    disabled={isProcessing || paymentStatus === 'success'}
                     className="w-full"
                   >
                     {isProcessing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                    Confirmer le paiement
+                    {paymentStatus === 'success' ? 'Paiement confirmé' : 'Confirmer le paiement'}
                   </Button>
                 </CardFooter>
               </form>

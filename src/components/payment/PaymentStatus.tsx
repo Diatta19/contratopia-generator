@@ -1,16 +1,30 @@
 
 import React from "react";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
 
 interface PaymentStatusProps {
   isProcessing: boolean;
   isComplete: boolean;
+  error?: string | null;
 }
 
 const PaymentStatus: React.FC<PaymentStatusProps> = ({ 
   isProcessing, 
-  isComplete 
+  isComplete,
+  error = null
 }) => {
+  if (error) {
+    return (
+      <div className="py-8 text-center">
+        <div className="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-4">
+          <AlertCircle className="h-6 w-6" />
+        </div>
+        <h3 className="text-lg font-medium mb-2">Échec du paiement</h3>
+        <p className="text-muted-foreground">{error}</p>
+      </div>
+    );
+  }
+  
   if (isComplete) {
     return (
       <div className="py-8 text-center">

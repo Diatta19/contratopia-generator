@@ -17,6 +17,13 @@ export interface PaymentMethod {
   icon: React.ReactNode;
 }
 
+export interface Currency {
+  id: string;
+  name: string;
+  symbol: string;
+  code: string;
+}
+
 export const paymentOptions: PaymentOption[] = [
   { 
     id: "color-blue", 
@@ -69,17 +76,17 @@ export const paymentMethods: PaymentMethod[] = [
   }
 ];
 
-export const currencies = [
-  { id: "fcf", name: "Franc CFA (FCFA)", symbol: "FCFA" },
-  { id: "eur", name: "Euro (€)", symbol: "€" },
-  { id: "usd", name: "Dollar US ($)", symbol: "$" },
-  { id: "gbp", name: "Livre Sterling (£)", symbol: "£" },
-  { id: "mad", name: "Dirham Marocain (MAD)", symbol: "MAD" },
-  { id: "dzd", name: "Dinar Algérien (DZD)", symbol: "DZD" },
-  { id: "tnd", name: "Dinar Tunisien (TND)", symbol: "TND" },
-  { id: "kes", name: "Shilling Kényan (KES)", symbol: "KES" },
-  { id: "ngn", name: "Naira Nigérian (₦)", symbol: "₦" },
-  { id: "zar", name: "Rand Sud-Africain (R)", symbol: "R" },
-  { id: "cad", name: "Dollar Canadien (CA$)", symbol: "CA$" },
-  { id: "chf", name: "Franc Suisse (CHF)", symbol: "CHF" },
+export const currencies: Currency[] = [
+  { id: "fcf", name: "Franc CFA (FCFA)", symbol: "FCFA", code: "XOF" },
+  { id: "eur", name: "Euro (€)", symbol: "€", code: "EUR" },
+  { id: "usd", name: "Dollar US ($)", symbol: "$", code: "USD" },
+  { id: "gbp", name: "Livre Sterling (£)", symbol: "£", code: "GBP" },
+  { id: "mad", name: "Dirham Marocain (MAD)", symbol: "MAD", code: "MAD" },
+  { id: "dzd", name: "Dinar Algérien (DZD)", symbol: "DZD", code: "DZD" },
+  { id: "tnd", name: "Dinar Tunisien (TND)", symbol: "TND", code: "TND" },
+  { id: "kes", name: "Shilling Kényan (KES)", symbol: "KES", code: "KES" },
+  { id: "ngn", name: "Naira Nigérian (₦)", symbol: "₦", code: "NGN" },
+  { id: "zar", name: "Rand Sud-Africain (R)", symbol: "R", code: "ZAR" },
+  { id: "cad", name: "Dollar Canadien (CA$)", symbol: "CA$", code: "CAD" },
+  { id: "chf", name: "Franc Suisse (CHF)", symbol: "CHF", code: "CHF" },
 ];
