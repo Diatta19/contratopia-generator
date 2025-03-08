@@ -14,7 +14,7 @@ export interface PaymentMethod {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
+  icon: React.ElementType; // Changed from React.ReactNode to React.ElementType
 }
 
 export interface Currency {
@@ -60,19 +60,19 @@ export const paymentMethods: PaymentMethod[] = [
     id: "mobile-money",
     name: "Mobile Money",
     description: "Paiement via Orange Money, Wave, ou Free Money",
-    icon: <Smartphone className="h-5 w-5" />
+    icon: Smartphone // Changed from JSX to just passing the component itself
   },
   {
     id: "card",
     name: "Carte Bancaire",
     description: "Paiement sécurisé par carte bancaire",
-    icon: <CreditCard className="h-5 w-5" />
+    icon: CreditCard // Changed from JSX to just passing the component itself
   },
   {
     id: "wallet",
     name: "Portefeuille Électronique",
     description: "PayPal, Skrill ou autre portefeuille électronique",
-    icon: <Wallet className="h-5 w-5" />
+    icon: Wallet // Changed from JSX to just passing the component itself
   }
 ];
 

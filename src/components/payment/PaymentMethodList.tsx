@@ -42,21 +42,26 @@ const PaymentMethodList: React.FC<PaymentMethodListProps> = ({
     <div className="py-4">
       <h3 className="text-sm font-medium mb-3">Choisissez votre mode de paiement :</h3>
       <RadioGroup value={selectedMethod} onValueChange={onMethodSelect}>
-        {methods.map((method) => (
-          <div
-            key={method.id}
-            className="flex items-center space-x-2 mb-4 p-3 border rounded-md hover:bg-gray-50"
-          >
-            <RadioGroupItem value={method.id} id={method.id} />
-            <Label htmlFor={method.id} className="flex-1 cursor-pointer">
-              <div className="flex items-center gap-2">
-                {method.icon}
-                <span className="font-medium">{method.name}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">{method.description}</p>
-            </Label>
-          </div>
-        ))}
+        {methods.map((method) => {
+          // Create icon component dynamically
+          const IconComponent = method.icon;
+          
+          return (
+            <div
+              key={method.id}
+              className="flex items-center space-x-2 mb-4 p-3 border rounded-md hover:bg-gray-50"
+            >
+              <RadioGroupItem value={method.id} id={method.id} />
+              <Label htmlFor={method.id} className="flex-1 cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <IconComponent className="h-5 w-5" />
+                  <span className="font-medium">{method.name}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{method.description}</p>
+              </Label>
+            </div>
+          );
+        })}
       </RadioGroup>
 
       {showPaymentCodeInput && (
