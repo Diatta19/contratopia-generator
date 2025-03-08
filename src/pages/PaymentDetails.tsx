@@ -92,8 +92,8 @@ const PaymentDetails: React.FC = () => {
       
       if (paymentResult.success) {
         if (method === "mobile-money" && (data.mobileProvider === "orange" || 
-                                          data.mobileProvider === "free" || 
-                                          data.mobileProvider === "mtn")) {
+                                        data.mobileProvider === "free" || 
+                                        data.mobileProvider === "mtn")) {
           // For these providers, we need an auth code, so we stay in the pending state
           setIsProcessing(false);
           return;
