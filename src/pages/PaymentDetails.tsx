@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -10,6 +9,21 @@ import { initiatePayment, verifyPayment } from "@/utils/lygosPayment";
 import { currencies } from "@/data/paymentOptions";
 import PaymentForm from "@/components/payment/PaymentForm";
 import PaymentStatus from "@/components/payment/PaymentStatus";
+
+interface PaymentData {
+  amount: number;
+  description: string;
+  currency: string;
+  paymentMethod: string;
+  customerPhone?: string;
+  provider?: string;
+  cardDetails?: {
+    number: string;
+    expiry: string;
+    cvv: string;
+  };
+  email?: string;
+}
 
 const PaymentDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -44,7 +58,7 @@ const PaymentDetails: React.FC = () => {
     setPaymentError(null);
     
     try {
-      let paymentData = {
+      let paymentData: PaymentData = {
         amount,
         description: `ContratPro - ${paymentOption}`,
         currency: currencyCode,
@@ -88,7 +102,7 @@ const PaymentDetails: React.FC = () => {
         };
       }
       
-      const paymentResult = await initiatePayment(paymentData as any);
+      const paymentResult = await initiatePayment(paymentData);
       
       if (paymentResult.success) {
         if (method === "mobile-money" && (data.mobileProvider === "orange" || 
@@ -133,7 +147,7 @@ const PaymentDetails: React.FC = () => {
     }
   };
   
-  const getMethodTitle = () => {
+  function getMethodTitle() {
     switch (method) {
       case "mobile-money":
         return "Mobile Money";
@@ -144,10 +158,9 @@ const PaymentDetails: React.FC = () => {
       default:
         return "Paiement";
     }
-  };
+  }
 
-  // Render appropriate content based on payment status
-  const renderContent = () => {
+  function renderContent() {
     if (paymentStatus === 'success') {
       return <PaymentStatus isProcessing={false} isComplete={true} />;
     }
@@ -175,7 +188,7 @@ const PaymentDetails: React.FC = () => {
         onSubmit={handleSubmit}
       />
     );
-  };
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">

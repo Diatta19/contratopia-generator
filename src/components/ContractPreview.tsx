@@ -13,13 +13,20 @@ interface ContractData {
   contractType: string;
   clientName: string;
   clientAddress: string;
+  clientPhone: string;
   providerName: string;
   providerAddress: string;
+  providerPhone: string;
   projectDescription: string;
   contractAmount: string;
   currency: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
+  paymentSchedule: {
+    installments: number;
+    firstPaymentPercent: number;
+    installmentDates: string[];
+  };
 }
 
 interface ContractPreviewProps {
@@ -119,6 +126,39 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
     });
   };
 
+  const renderPaymentSchedule = () => {
+    if (contractData.paymentSchedule.installments <= 1) {
+      return (
+        <p className="text-sm leading-relaxed">
+          Le paiement s'effectuera en une seule fois à la signature du contrat, pour un montant total de {contractData.contractAmount} {getCurrencySymbol(contractData.currency)}.
+        </p>
+      );
+    }
+    
+    const totalAmount = Number(contractData.contractAmount);
+    const firstAmount = (totalAmount * contractData.paymentSchedule.firstPaymentPercent) / 100;
+    const remainingAmount = totalAmount - firstAmount;
+    const installmentAmount = remainingAmount / (contractData.paymentSchedule.installments - 1);
+    
+    return (
+      <div className="space-y-2">
+        <p className="text-sm leading-relaxed">
+          Le paiement s'effectuera en {contractData.paymentSchedule.installments} versements selon l'échéancier suivant:
+        </p>
+        <ul className="text-sm space-y-1 list-disc pl-5">
+          <li>
+            <strong>Premier versement:</strong> {firstAmount.toFixed(2)} {getCurrencySymbol(contractData.currency)} ({contractData.paymentSchedule.firstPaymentPercent}%) à la signature du contrat
+          </li>
+          {Array.from({ length: contractData.paymentSchedule.installments - 1 }, (_, i) => (
+            <li key={i}>
+              <strong>Versement #{i + 2}:</strong> {installmentAmount.toFixed(2)} {getCurrencySymbol(contractData.currency)} ({((100 - contractData.paymentSchedule.firstPaymentPercent) / (contractData.paymentSchedule.installments - 1)).toFixed(1)}%) {contractData.paymentSchedule.installmentDates[i + 1]}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   const renderContractSpecificSections = () => {
     switch (contractData.contractType) {
       case "rentalContract":
@@ -200,13 +240,15 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
                   <div className="border-l-2 pl-4">
                     <h3 className="font-medium mb-2">LE CLIENT</h3>
                     <p className="text-sm text-foreground mb-1">{contractData.clientName}</p>
-                    <p className="text-sm text-muted-foreground">{contractData.clientAddress}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{contractData.clientAddress}</p>
+                    <p className="text-sm text-muted-foreground">{contractData.clientPhone}</p>
                   </div>
                   
                   <div className="border-l-2 pl-4">
                     <h3 className="font-medium mb-2">LE PRESTATAIRE</h3>
                     <p className="text-sm text-foreground mb-1">{contractData.providerName}</p>
-                    <p className="text-sm text-muted-foreground">{contractData.providerAddress}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{contractData.providerAddress}</p>
+                    <p className="text-sm text-muted-foreground">{contractData.providerPhone}</p>
                   </div>
                 </div>
               </div>
@@ -219,7 +261,8 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
               <div className="space-y-4">
                 <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 2 - Durée</h2>
                 <p className="text-sm leading-relaxed">
-                  Le présent contrat prend effet à compter du {formatDate(contractData.startDate)} et se termine le {formatDate(contractData.endDate)}.
+                  Le présent contrat prend effet à compter du {formatDate(contractData.startDate)}
+                  {contractData.endDate ? ` et se termine le ${formatDate(contractData.endDate)}` : ", pour une durée indéterminée"}.
                 </p>
               </div>
 
@@ -228,6 +271,11 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
                 <p className="text-sm leading-relaxed">
                   En contrepartie des prestations définies à l'article 1, le client versera au prestataire la somme de {contractData.contractAmount} {getCurrencySymbol(contractData.currency)}.
                 </p>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Modalités de paiement</h2>
+                {renderPaymentSchedule()}
               </div>
 
               {renderContractSpecificSections()}

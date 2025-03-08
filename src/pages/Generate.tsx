@@ -15,12 +15,20 @@ interface ContractData {
   contractType: string;
   clientName: string;
   clientAddress: string;
+  clientPhone: string;
   providerName: string;
   providerAddress: string;
+  providerPhone: string;
   projectDescription: string;
   contractAmount: string;
+  currency: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
+  paymentSchedule: {
+    installments: number;
+    firstPaymentPercent: number;
+    installmentDates: string[];
+  };
 }
 
 const Generate = () => {
