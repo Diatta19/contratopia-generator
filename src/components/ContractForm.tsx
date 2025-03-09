@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -61,6 +60,7 @@ const contractFormSchema = z.object({
     message: "La description doit contenir au moins 10 caractères",
   }),
   contractDetails: z.string().optional(),
+  penalties: z.string().optional(),
   contractAmount: z.string().refine((val) => !isNaN(Number(val)), {
     message: "Le montant doit être un nombre valide",
   }),
@@ -93,6 +93,7 @@ const getSubtypeOptions = (contractType: string) => {
         { value: "design", label: "Design" },
         { value: "marketing", label: "Marketing" },
         { value: "maintenance", label: "Maintenance" },
+        { value: "website", label: "Site Web" },
         { value: "other", label: "Autre" },
       ];
     case "workContract":
@@ -168,6 +169,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
       providerPhone: "",
       projectDescription: "",
       contractDetails: "",
+      penalties: "",
       contractAmount: "",
       currency: "fcf",
       startDate: "",
@@ -186,7 +188,6 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
   const currency = form.watch("currency");
   const startDate = form.watch("startDate");
 
-  // Initialiser et mettre à jour les délais de paiement quand le nombre d'installments change
   useEffect(() => {
     if (isInstallmentPayment && installments > 1) {
       const newIntervals = Array(installments - 1).fill(null).map((_, i) => ({
@@ -197,7 +198,6 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
     }
   }, [isInstallmentPayment, installments]);
 
-  // Calculer les montants des versements
   const calculateInstallments = () => {
     if (!contractAmount || isNaN(Number(contractAmount))) return [];
     
@@ -259,7 +259,6 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
     try {
       setIsSubmitting(true);
       
-      // Préparer les données pour le contrat
       const installmentSchedule = calculateInstallments();
       const formattedData = {
         ...data,
@@ -271,7 +270,6 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
         },
       };
       
-      // Simuler un délai de serveur
       await new Promise((resolve) => setTimeout(resolve, 1000));
       onFormSubmit(formattedData);
       toast.success("Formulaire soumis avec succès!");
@@ -283,7 +281,6 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
     }
   };
 
-  // Fonction pour obtenir le champ de détails spécifique au type de contrat
   const renderContractSpecificFields = () => {
     if (!contractType) return null;
     
@@ -342,7 +339,6 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
     );
   };
 
-  // Fonction pour obtenir le placeholder selon le type de contrat
   const getContractDetailsPlaceholder = (type: string) => {
     const placeholders: Record<string, string> = {
       serviceAgreement: "Précisez les livrables, les délais de livraison, les critères de qualité, etc.",
@@ -559,6 +555,28 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="penalties"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sanctions en cas de non-respect</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Décrivez les pénalités applicables en cas de non-respect des engagements (retard, non-conformité, etc.)"
+                      className="min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Spécifiez les sanctions, pénalités ou mesures en cas de manquement aux obligations contractuelles.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}

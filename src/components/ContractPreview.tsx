@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Download, FileCheck, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ interface ContractData {
   providerPhone: string;
   projectDescription: string;
   contractDetails?: string;
+  penalties?: string;
   contractAmount: string;
   currency: string;
   startDate: string;
@@ -131,6 +131,23 @@ const getColorStyle = (colorKey: string) => {
   return colorMap[colorKey] || colorMap.default;
 };
 
+const getSignatoryTitles = (contractType: string): { first: string; second: string } => {
+  switch (contractType) {
+    case "workContract":
+      return { first: "Pour l'employeur", second: "Pour l'employé" };
+    case "nda":
+      return { first: "Pour le divulgateur", second: "Pour le récepteur" };
+    case "saleContract":
+      return { first: "Pour le vendeur", second: "Pour l'acheteur" };
+    case "rentalContract":
+      return { first: "Pour le bailleur", second: "Pour le locataire" };
+    case "partnershipContract":
+      return { first: "Pour le partenaire 1", second: "Pour le partenaire 2" };
+    default:
+      return { first: "Pour le prestataire", second: "Pour le client" };
+  }
+};
+
 const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
   const [color, setColor] = useState<string>("default");
   const [hasDownloaded, setHasDownloaded] = useState<boolean>(false);
@@ -231,6 +248,8 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
     );
   };
 
+  const signatoryTitles = getSignatoryTitles(contractData.contractType);
+
   return (
     <div className="flex flex-col h-full animate-in fade-in-0">
       <div className="flex items-center justify-between mb-6">
@@ -314,20 +333,33 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
                 {renderPaymentSchedule()}
               </div>
 
-              <div className="mt-12 pt-8 border-t">
+              {contractData.penalties && (
+                <div className="space-y-4">
+                  <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 5 - Sanctions en cas de non-respect</h2>
+                  <p className="text-sm leading-relaxed whitespace-pre-line">
+                    {contractData.penalties}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-16 pt-8 border-t">
                 <p className="text-sm text-muted-foreground mb-10">
                   Fait en deux exemplaires originaux, à ____________, le ____________
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="text-center">
-                    <p className="text-sm font-medium mb-1">Pour le client</p>
-                    <p className="text-sm text-muted-foreground">Signature précédée de la mention "Lu et approuvé"</p>
+                    <p className="text-sm font-medium mb-1">{signatoryTitles.first}</p>
+                    <p className="text-sm text-muted-foreground mb-6">Signature précédée de la mention "Lu et approuvé"</p>
+                    <div className="h-24 border-b border-dashed border-gray-300 mb-2"></div>
+                    <p className="text-xs text-muted-foreground">Nom et signature</p>
                   </div>
                   
                   <div className="text-center">
-                    <p className="text-sm font-medium mb-1">Pour le prestataire</p>
-                    <p className="text-sm text-muted-foreground">Signature précédée de la mention "Lu et approuvé"</p>
+                    <p className="text-sm font-medium mb-1">{signatoryTitles.second}</p>
+                    <p className="text-sm text-muted-foreground mb-6">Signature précédée de la mention "Lu et approuvé"</p>
+                    <div className="h-24 border-b border-dashed border-gray-300 mb-2"></div>
+                    <p className="text-xs text-muted-foreground">Nom et signature</p>
                   </div>
                 </div>
               </div>

@@ -22,6 +22,7 @@ interface ContractData {
   providerPhone: string;
   projectDescription: string;
   contractDetails?: string;
+  penalties?: string;
   contractAmount: string;
   currency: string;
   startDate: string;
