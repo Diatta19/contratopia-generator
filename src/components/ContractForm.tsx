@@ -82,6 +82,7 @@ type ContractFormValues = z.infer<typeof contractFormSchema>;
 
 interface ContractFormProps {
   onFormSubmit: (data: any) => void;
+  initialData?: any;
 }
 
 const getSubtypeOptions = (contractType: string) => {
@@ -151,14 +152,14 @@ const timeUnits = [
   { value: "years", label: "Années" },
 ];
 
-const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
+const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit, initialData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEndDate, setShowEndDate] = useState(true);
   const [paymentIntervals, setPaymentIntervals] = useState<Array<{interval: string, unit: string}>>([]);
   
   const form = useForm<ContractFormValues>({
     resolver: zodResolver(contractFormSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       contractType: "",
       contractSubtype: "",
       clientName: "",
@@ -179,6 +180,18 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
       firstPaymentPercent: 50,
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      form.reset(initialData);
+      
+      setShowEndDate(!!initialData.endDate);
+      
+      if (initialData.paymentSchedule?.paymentIntervals) {
+        setPaymentIntervals(initialData.paymentSchedule.paymentIntervals);
+      }
+    }
+  }, [initialData, form]);
 
   const contractType = form.watch("contractType");
   const isInstallmentPayment = form.watch("isInstallmentPayment");

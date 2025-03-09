@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/layout/Header";
@@ -42,24 +41,18 @@ const Generate = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if returning from payment page
     const state = location.state as any;
     
-    // If returning with contractData from payment page, restore it
     if (state?.contractData) {
       setContractData(state.contractData);
     }
     
-    // Check if returning from payment with success
     if (state?.paymentSuccess && state?.selectedOption) {
-      // Store in sessionStorage to be picked up by PaymentModal
       sessionStorage.setItem('paymentSuccess', 'true');
       sessionStorage.setItem('paymentOption', state.selectedOption);
       
-      // Trigger storage event for PaymentModal to detect
       window.dispatchEvent(new Event('storage'));
       
-      // Clear location state
       window.history.replaceState({}, document.title);
     }
   }, [location]);
@@ -67,7 +60,6 @@ const Generate = () => {
   const handleFormSubmit = (data: ContractData) => {
     setContractData(data);
     
-    // Scroll to contract preview on mobile
     if (window.innerWidth < 768) {
       const previewElement = document.getElementById("contract-preview");
       if (previewElement) {
