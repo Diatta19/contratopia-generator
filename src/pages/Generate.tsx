@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "@/components/layout/Header";
@@ -9,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
 import { Button } from "@/components/ui/button";
 import { UserCircle } from "lucide-react";
+import { contractTemplates } from "@/data/contractTemplates";
 
 interface ContractData {
   contractType: string;
@@ -43,10 +45,26 @@ const Generate = () => {
   useEffect(() => {
     const state = location.state as any;
     
+    // Handle contract data from previous state
     if (state?.contractData) {
       setContractData(state.contractData);
     }
     
+    // Handle template selection
+    if (state?.templateId) {
+      const selectedTemplate = contractTemplates.find(
+        template => template.id === state.templateId
+      );
+      
+      if (selectedTemplate) {
+        setContractData(selectedTemplate.templateData);
+      }
+      
+      // Remove templateId from browser history to prevent reloading the template on page refresh
+      window.history.replaceState({}, document.title);
+    }
+    
+    // Handle payment success
     if (state?.paymentSuccess && state?.selectedOption) {
       sessionStorage.setItem('paymentSuccess', 'true');
       sessionStorage.setItem('paymentOption', state.selectedOption);

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -5,6 +6,7 @@ import { FileText, ChevronRight, Check, Search, BookOpen, Shield } from "lucide-
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { contractTemplates } from "@/data/contractTemplates";
 
 const features = [
   {
@@ -161,7 +163,7 @@ const Index = () => {
           
           {/* Grille de modèles */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {contractTemplates.map((template) => (
+            {contractTemplates.slice(0, 6).map((template) => (
               <div key={template.id} className="bg-white rounded-lg overflow-hidden border hover:shadow-md transition-shadow">
                 <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                   <img 
@@ -174,7 +176,12 @@ const Index = () => {
                   <h3 className="text-xl font-semibold mb-2">{template.title}</h3>
                   <p className="text-muted-foreground mb-4">{template.description}</p>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700" asChild>
-                    <Link to="/generate">Utiliser ce modèle</Link>
+                    <Link 
+                      to="/generate" 
+                      state={{ templateId: template.id }}
+                    >
+                      Utiliser ce modèle
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -182,8 +189,10 @@ const Index = () => {
           </div>
           
           <div className="mt-12 text-center">
-            <Button variant="outline" size="lg">
-              Voir tous les modèles
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/templates">
+                Voir tous les modèles
+              </Link>
             </Button>
           </div>
         </div>
