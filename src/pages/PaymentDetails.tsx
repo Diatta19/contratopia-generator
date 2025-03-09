@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -35,7 +36,7 @@ const PaymentDetails: React.FC = () => {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [pendingAuthCode, setPendingAuthCode] = useState(false);
   
-  const { method, amount, paymentOption, currency = "fcf" } = location.state || {};
+  const { method, amount, paymentOption, currency = "fcf", contractData } = location.state || {};
   
   const currencySymbol = currencies.find(c => c.id === currency)?.symbol || currency.toUpperCase();
   const currencyCode = currencies.find(c => c.id === currency)?.code || currency.toUpperCase();
@@ -119,13 +120,22 @@ const PaymentDetails: React.FC = () => {
           setPaymentStatus('success');
           toast.success("Paiement réussi !");
           
+          // Store payment success data in sessionStorage
           sessionStorage.setItem('paymentSuccess', 'true');
           sessionStorage.setItem('paymentOption', paymentOption);
           
+          // Dispatch storage event to be detected by other components
           window.dispatchEvent(new Event('storage'));
           
+          // Navigate back to generate page with contractData if available
           setTimeout(() => {
-            navigate("/generate");
+            navigate("/generate", {
+              state: { 
+                paymentSuccess: true, 
+                selectedOption: paymentOption,
+                contractData: contractData // Pass contract data back if available
+              }
+            });
           }, 1500);
         } else {
           setPaymentStatus('error');

@@ -21,12 +21,14 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPaymentSuccess: (optionId: string) => void;
+  contractData?: any;
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ 
   isOpen, 
   onClose, 
-  onPaymentSuccess 
+  onPaymentSuccess,
+  contractData
 }) => {
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -102,14 +104,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     // Close the modal
     onClose();
     
-    // Navigate to payment details page with payment information
+    // Navigate to payment details page with payment information and contract data
     navigate("/payment-details", {
       state: {
         method: selectedPaymentMethod,
         amount: selectedPaymentOption.price,
         paymentOption: selectedOption,
         mobileProvider: selectedMobileProvider,
-        paymentCode: paymentCode
+        paymentCode: paymentCode,
+        contractData: contractData // Pass contract data to maintain state
       }
     });
   };

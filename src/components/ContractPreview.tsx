@@ -378,6 +378,7 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onPaymentSuccess={handlePaymentSuccess}
+        contractData={contractData}
       />
     </div>
   );

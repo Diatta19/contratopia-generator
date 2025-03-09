@@ -42,8 +42,15 @@ const Generate = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if returning from payment with success
+    // Check if returning from payment page
     const state = location.state as any;
+    
+    // If returning with contractData from payment page, restore it
+    if (state?.contractData) {
+      setContractData(state.contractData);
+    }
+    
+    // Check if returning from payment with success
     if (state?.paymentSuccess && state?.selectedOption) {
       // Store in sessionStorage to be picked up by PaymentModal
       sessionStorage.setItem('paymentSuccess', 'true');
@@ -100,7 +107,7 @@ const Generate = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div className="bg-card border rounded-lg p-6 shadow-soft">
-              <ContractForm onFormSubmit={handleFormSubmit} />
+              <ContractForm onFormSubmit={handleFormSubmit} initialData={contractData} />
             </div>
             
             <div id="contract-preview" className="bg-card border rounded-lg p-6 shadow-soft min-h-[600px] flex flex-col">
