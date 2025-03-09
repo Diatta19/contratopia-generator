@@ -13,6 +13,7 @@ import { UserCircle } from "lucide-react";
 
 interface ContractData {
   contractType: string;
+  contractSubtype?: string;
   clientName: string;
   clientAddress: string;
   clientPhone: string;
@@ -20,6 +21,7 @@ interface ContractData {
   providerAddress: string;
   providerPhone: string;
   projectDescription: string;
+  contractDetails?: string;
   contractAmount: string;
   currency: string;
   startDate: string;
@@ -28,6 +30,7 @@ interface ContractData {
     installments: number;
     firstPaymentPercent: number;
     installmentDates: string[];
+    paymentIntervals?: Array<{interval: string, unit: string}>;
   };
 }
 

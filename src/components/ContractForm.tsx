@@ -38,6 +38,7 @@ const contractFormSchema = z.object({
   contractType: z.string({
     required_error: "Veuillez sélectionner un type de contrat",
   }),
+  contractSubtype: z.string().optional(),
   clientName: z.string().min(2, {
     message: "Le nom du client doit contenir au moins 2 caractères",
   }),
@@ -59,6 +60,7 @@ const contractFormSchema = z.object({
   projectDescription: z.string().min(10, {
     message: "La description doit contenir au moins 10 caractères",
   }),
+  contractDetails: z.string().optional(),
   contractAmount: z.string().refine((val) => !isNaN(Number(val)), {
     message: "Le montant doit être un nombre valide",
   }),
@@ -70,6 +72,10 @@ const contractFormSchema = z.object({
   isInstallmentPayment: z.boolean().default(false),
   installments: z.number().min(1).default(2),
   firstPaymentPercent: z.number().min(1).max(99).default(50),
+  paymentIntervals: z.array(z.object({
+    interval: z.string(),
+    unit: z.string(),
+  })).optional(),
 });
 
 type ContractFormValues = z.infer<typeof contractFormSchema>;
@@ -78,14 +84,82 @@ interface ContractFormProps {
   onFormSubmit: (data: any) => void;
 }
 
+const getSubtypeOptions = (contractType: string) => {
+  switch (contractType) {
+    case "serviceAgreement":
+      return [
+        { value: "consulting", label: "Consultation" },
+        { value: "development", label: "Développement" },
+        { value: "design", label: "Design" },
+        { value: "marketing", label: "Marketing" },
+        { value: "maintenance", label: "Maintenance" },
+        { value: "other", label: "Autre" },
+      ];
+    case "workContract":
+      return [
+        { value: "cdi", label: "CDI - Contrat à Durée Indéterminée" },
+        { value: "cdd", label: "CDD - Contrat à Durée Déterminée" },
+        { value: "freelance", label: "Freelance / Indépendant" },
+        { value: "internship", label: "Stage" },
+        { value: "apprenticeship", label: "Apprentissage" },
+        { value: "other", label: "Autre" },
+      ];
+    case "nda":
+      return [
+        { value: "unilateral", label: "Unilatéral" },
+        { value: "bilateral", label: "Bilatéral" },
+        { value: "employee", label: "Employé" },
+        { value: "consultant", label: "Consultant" },
+        { value: "other", label: "Autre" },
+      ];
+    case "saleContract":
+      return [
+        { value: "goods", label: "Vente de biens" },
+        { value: "services", label: "Vente de services" },
+        { value: "digitalProducts", label: "Produits numériques" },
+        { value: "realEstate", label: "Immobilier" },
+        { value: "vehicle", label: "Véhicule" },
+        { value: "other", label: "Autre" },
+      ];
+    case "rentalContract":
+      return [
+        { value: "residential", label: "Résidentiel" },
+        { value: "commercial", label: "Commercial" },
+        { value: "equipment", label: "Équipement" },
+        { value: "vehicle", label: "Véhicule" },
+        { value: "other", label: "Autre" },
+      ];
+    case "partnershipContract":
+      return [
+        { value: "joint", label: "Entreprise commune" },
+        { value: "distribution", label: "Distribution" },
+        { value: "licensing", label: "Licence" },
+        { value: "franchising", label: "Franchise" },
+        { value: "strategic", label: "Alliance stratégique" },
+        { value: "other", label: "Autre" },
+      ];
+    default:
+      return [];
+  }
+};
+
+const timeUnits = [
+  { value: "days", label: "Jours" },
+  { value: "weeks", label: "Semaines" },
+  { value: "months", label: "Mois" },
+  { value: "years", label: "Années" },
+];
+
 const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEndDate, setShowEndDate] = useState(true);
+  const [paymentIntervals, setPaymentIntervals] = useState<Array<{interval: string, unit: string}>>([]);
   
   const form = useForm<ContractFormValues>({
     resolver: zodResolver(contractFormSchema),
     defaultValues: {
       contractType: "",
+      contractSubtype: "",
       clientName: "",
       clientAddress: "",
       clientPhone: "",
@@ -93,6 +167,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
       providerAddress: "",
       providerPhone: "",
       projectDescription: "",
+      contractDetails: "",
       contractAmount: "",
       currency: "fcf",
       startDate: "",
@@ -103,12 +178,24 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
     },
   });
 
+  const contractType = form.watch("contractType");
   const isInstallmentPayment = form.watch("isInstallmentPayment");
   const installments = form.watch("installments");
   const firstPaymentPercent = form.watch("firstPaymentPercent");
   const contractAmount = form.watch("contractAmount");
   const currency = form.watch("currency");
   const startDate = form.watch("startDate");
+
+  // Initialiser et mettre à jour les délais de paiement quand le nombre d'installments change
+  useEffect(() => {
+    if (isInstallmentPayment && installments > 1) {
+      const newIntervals = Array(installments - 1).fill(null).map((_, i) => ({
+        interval: "30",
+        unit: "days",
+      }));
+      setPaymentIntervals(newIntervals);
+    }
+  }, [isInstallmentPayment, installments]);
 
   // Calculer les montants des versements
   const calculateInstallments = () => {
@@ -126,13 +213,46 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
         amount: firstAmount.toFixed(2),
         date: "À la signature",
       },
-      ...Array.from({ length: installments - 1 }, (_, i) => ({
-        number: i + 2,
-        percent: ((100 - firstPaymentPercent) / (installments - 1)).toFixed(1),
-        amount: installmentAmount.toFixed(2),
-        date: `${30 * (i + 1)} jours après la signature`,
-      })),
+      ...Array.from({ length: installments - 1 }, (_, i) => {
+        const interval = paymentIntervals[i]?.interval || "30";
+        const unit = paymentIntervals[i]?.unit || "days";
+        
+        let dateLabel = "";
+        switch (unit) {
+          case "days":
+            dateLabel = `${interval} jours après la signature`;
+            break;
+          case "weeks":
+            dateLabel = `${interval} semaine${parseInt(interval) > 1 ? 's' : ''} après la signature`;
+            break;
+          case "months":
+            dateLabel = `${interval} mois après la signature`;
+            break;
+          case "years":
+            dateLabel = `${interval} an${parseInt(interval) > 1 ? 's' : ''} après la signature`;
+            break;
+        }
+        
+        return {
+          number: i + 2,
+          percent: ((100 - firstPaymentPercent) / (installments - 1)).toFixed(1),
+          amount: installmentAmount.toFixed(2),
+          date: dateLabel,
+        };
+      }),
     ];
+  };
+
+  const handleIntervalChange = (index: number, value: string) => {
+    const newIntervals = [...paymentIntervals];
+    newIntervals[index] = { ...newIntervals[index], interval: value };
+    setPaymentIntervals(newIntervals);
+  };
+
+  const handleUnitChange = (index: number, value: string) => {
+    const newIntervals = [...paymentIntervals];
+    newIntervals[index] = { ...newIntervals[index], unit: value };
+    setPaymentIntervals(newIntervals);
   };
 
   const onSubmit = async (data: ContractFormValues) => {
@@ -140,12 +260,14 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
       setIsSubmitting(true);
       
       // Préparer les données pour le contrat
+      const installmentSchedule = calculateInstallments();
       const formattedData = {
         ...data,
         paymentSchedule: {
           installments: data.isInstallmentPayment ? data.installments : 1,
           firstPaymentPercent: data.firstPaymentPercent,
-          installmentDates: calculateInstallments().map(item => item.date),
+          installmentDates: installmentSchedule.map(item => item.date),
+          paymentIntervals: paymentIntervals
         },
       };
       
@@ -159,6 +281,79 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Fonction pour obtenir le champ de détails spécifique au type de contrat
+  const renderContractSpecificFields = () => {
+    if (!contractType) return null;
+    
+    const subtypeOptions = getSubtypeOptions(contractType);
+    
+    return (
+      <div className="space-y-6">
+        {subtypeOptions.length > 0 && (
+          <FormField
+            control={form.control}
+            name="contractSubtype"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type spécifique</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez un sous-type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {subtypeOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        
+        <FormField
+          control={form.control}
+          name="contractDetails"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Détails spécifiques</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Ajoutez des détails spécifiques à ce type de contrat..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                {getContractDetailsPlaceholder(contractType)}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    );
+  };
+
+  // Fonction pour obtenir le placeholder selon le type de contrat
+  const getContractDetailsPlaceholder = (type: string) => {
+    const placeholders: Record<string, string> = {
+      serviceAgreement: "Précisez les livrables, les délais de livraison, les critères de qualité, etc.",
+      workContract: "Précisez les horaires, les avantages, les conditions particulières, etc.",
+      nda: "Précisez la durée de confidentialité, les informations concernées, les exceptions, etc.",
+      saleContract: "Précisez les caractéristiques du bien/service, les garanties, les conditions de livraison, etc.",
+      rentalContract: "Précisez les conditions d'utilisation, l'état du bien, les responsabilités, etc.",
+      partnershipContract: "Précisez les responsabilités de chaque partie, la répartition des bénéfices, etc.",
+    };
+    
+    return placeholders[type] || "Ajoutez des détails supplémentaires concernant ce contrat...";
   };
 
   return (
@@ -234,6 +429,8 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
               </div>
             </div>
           </div>
+          
+          {contractType && renderContractSpecificFields()}
         </div>
 
         <div className="space-y-5 animate-in fade-in-25 slide-in-from-bottom-4">
@@ -483,6 +680,45 @@ const ContractForm: React.FC<ContractFormProps> = ({ onFormSubmit }) => {
                             </FormItem>
                           )}
                         />
+                        
+                        {installments > 1 && (
+                          <div className="space-y-4">
+                            <h3 className="text-sm font-medium">Délais de paiement</h3>
+                            {Array.from({ length: installments - 1 }, (_, i) => (
+                              <div key={i} className="flex items-center gap-4 border p-3 rounded-md">
+                                <div className="font-medium text-sm">Versement #{i + 2}:</div>
+                                <div className="flex flex-1 items-center gap-2">
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    placeholder="30"
+                                    className="w-20"
+                                    value={paymentIntervals[i]?.interval || "30"}
+                                    onChange={(e) => handleIntervalChange(i, e.target.value)}
+                                  />
+                                  <Select
+                                    value={paymentIntervals[i]?.unit || "days"}
+                                    onValueChange={(value) => handleUnitChange(i, value)}
+                                  >
+                                    <SelectTrigger className="w-36">
+                                      <SelectValue placeholder="Unité" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {timeUnits.map(unit => (
+                                        <SelectItem key={unit.value} value={unit.value}>
+                                          {unit.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <div className="text-sm text-muted-foreground">
+                                    après la signature
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         
                         {contractAmount && !isNaN(Number(contractAmount)) && (
                           <div className="mt-4 space-y-4">

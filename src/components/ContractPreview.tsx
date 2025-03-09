@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Download, FileCheck, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { currencies } from "@/data/paymentOptions";
 
 interface ContractData {
   contractType: string;
+  contractSubtype?: string;
   clientName: string;
   clientAddress: string;
   clientPhone: string;
@@ -18,6 +20,7 @@ interface ContractData {
   providerAddress: string;
   providerPhone: string;
   projectDescription: string;
+  contractDetails?: string;
   contractAmount: string;
   currency: string;
   startDate: string;
@@ -26,6 +29,7 @@ interface ContractData {
     installments: number;
     firstPaymentPercent: number;
     installmentDates: string[];
+    paymentIntervals?: Array<{interval: string, unit: string}>;
   };
 }
 
@@ -53,6 +57,61 @@ const getContractTypeName = (contractType: string) => {
     partnershipContract: "Contrat de partenariat",
   };
   return types[contractType] || contractType;
+};
+
+const getContractSubtypeName = (contractType: string, contractSubtype?: string) => {
+  if (!contractSubtype) return "";
+  
+  const subtypes: Record<string, Record<string, string>> = {
+    serviceAgreement: {
+      consulting: "Consultation",
+      development: "Développement",
+      design: "Design",
+      marketing: "Marketing",
+      maintenance: "Maintenance",
+      other: "Autre",
+    },
+    workContract: {
+      cdi: "CDI - Contrat à Durée Indéterminée",
+      cdd: "CDD - Contrat à Durée Déterminée",
+      freelance: "Freelance / Indépendant",
+      internship: "Stage",
+      apprenticeship: "Apprentissage",
+      other: "Autre",
+    },
+    nda: {
+      unilateral: "Unilatéral",
+      bilateral: "Bilatéral",
+      employee: "Employé",
+      consultant: "Consultant",
+      other: "Autre",
+    },
+    saleContract: {
+      goods: "Vente de biens",
+      services: "Vente de services",
+      digitalProducts: "Produits numériques",
+      realEstate: "Immobilier",
+      vehicle: "Véhicule",
+      other: "Autre",
+    },
+    rentalContract: {
+      residential: "Résidentiel",
+      commercial: "Commercial",
+      equipment: "Équipement",
+      vehicle: "Véhicule",
+      other: "Autre",
+    },
+    partnershipContract: {
+      joint: "Entreprise commune",
+      distribution: "Distribution",
+      licensing: "Licence",
+      franchising: "Franchise",
+      strategic: "Alliance stratégique",
+      other: "Autre",
+    },
+  };
+  
+  return subtypes[contractType]?.[contractSubtype] || contractSubtype;
 };
 
 const getCurrencySymbol = (currencyId: string) => {
@@ -159,47 +218,17 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
     );
   };
 
-  const renderContractSpecificSections = () => {
-    switch (contractData.contractType) {
-      case "rentalContract":
-        return (
-          <div className="space-y-4">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Conditions spécifiques à la location</h2>
-            <p className="text-sm leading-relaxed">
-              Le locataire s'engage à utiliser le bien loué conformément à sa destination et à le restituer dans l'état où il l'a reçu. 
-              Un état des lieux sera effectué à l'entrée et à la sortie du bien.
-            </p>
-            <p className="text-sm leading-relaxed">
-              Le locataire s'engage à verser une caution de {parseInt(contractData.contractAmount) * 0.3} {getCurrencySymbol(contractData.currency)} 
-              qui lui sera restituée à la fin du contrat, déduction faite des éventuels dommages constatés.
-            </p>
-          </div>
-        );
-      case "partnershipContract":
-        return (
-          <div className="space-y-4">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Modalités du partenariat</h2>
-            <p className="text-sm leading-relaxed">
-              Les parties s'engagent à collaborer de bonne foi à la réalisation des objectifs communs définis dans ce contrat.
-              Chaque partie conserve son indépendance juridique et assume ses propres obligations légales et fiscales.
-            </p>
-            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground mt-4">Article 5 - Propriété intellectuelle</h2>
-            <p className="text-sm leading-relaxed">
-              Chaque partie reste propriétaire de ses droits de propriété intellectuelle. Les créations communes feront l'objet 
-              d'une copropriété selon la contribution de chaque partie.
-            </p>
-          </div>
-        );
-      default:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Conditions de paiement</h2>
-            <p className="text-sm leading-relaxed">
-              Le paiement s'effectuera selon les modalités suivantes : 30% à la signature du contrat, 70% à la livraison.
-            </p>
-          </div>
-        );
-    }
+  const renderContractSpecificContent = () => {
+    if (!contractData.contractDetails) return null;
+    
+    return (
+      <div className="space-y-4">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Détails spécifiques</h2>
+        <p className="text-sm leading-relaxed whitespace-pre-line">
+          {contractData.contractDetails}
+        </p>
+      </div>
+    );
   };
 
   return (
@@ -226,6 +255,11 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
                 contractData.contractType === "nda" && "uppercase"
               )}>
                 {getContractTypeName(contractData.contractType)}
+                {contractData.contractSubtype && (
+                  <span className="text-lg block mt-1">
+                    {getContractSubtypeName(contractData.contractType, contractData.contractSubtype)}
+                  </span>
+                )}
               </h1>
               <div className="text-muted-foreground text-sm">
                 Contrat établi le {new Date().toLocaleDateString("fr-FR")}
@@ -258,6 +292,8 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
                 <p className="text-sm leading-relaxed">{contractData.projectDescription}</p>
               </div>
 
+              {renderContractSpecificContent()}
+
               <div className="space-y-4">
                 <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 2 - Durée</h2>
                 <p className="text-sm leading-relaxed">
@@ -277,8 +313,6 @@ const ContractPreview: React.FC<ContractPreviewProps> = ({ contractData }) => {
                 <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Article 4 - Modalités de paiement</h2>
                 {renderPaymentSchedule()}
               </div>
-
-              {renderContractSpecificSections()}
 
               <div className="mt-12 pt-8 border-t">
                 <p className="text-sm text-muted-foreground mb-10">
