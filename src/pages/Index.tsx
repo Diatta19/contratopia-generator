@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -5,7 +6,6 @@ import { FileText, ChevronRight, Check, Search, BookOpen, Shield } from "lucide-
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { contractTemplates } from "@/data/contractTemplates";
 
 const features = [
   {
@@ -54,9 +54,6 @@ const Index = () => {
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline">
-                  Découvrir nos modèles
-                </Button>
               </div>
             </div>
             
@@ -96,64 +93,6 @@ const Index = () => {
                 <p className="text-muted-foreground">{feature.description}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* Section des modèles de contrat */}
-      <section className="py-16 md:py-24 px-6 bg-gray-50">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">
-              Nos modèles de contrats professionnels
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Découvrez notre sélection de modèles prêts à l'emploi, conçus par des experts juridiques pour répondre à tous vos besoins professionnels.
-            </p>
-          </div>
-          
-          {/* Filtres */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-            <Button variant="outline" className="rounded-full">Tous</Button>
-            <Button variant="outline" className="rounded-full">Services</Button>
-            <Button variant="outline" className="rounded-full">Emploi</Button>
-            <Button variant="outline" className="rounded-full">Commercial</Button>
-            <Button variant="outline" className="rounded-full">Confidentialité</Button>
-          </div>
-          
-          {/* Grille de modèles */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {contractTemplates.slice(0, 6).map((template) => (
-              <div key={template.id} className="bg-white rounded-lg overflow-hidden border hover:shadow-md transition-shadow">
-                <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                  <img 
-                    src={template.image} 
-                    alt={template.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{template.title}</h3>
-                  <p className="text-muted-foreground mb-4">{template.description}</p>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" asChild>
-                    <Link 
-                      to="/generate" 
-                      state={{ templateId: template.id }}
-                    >
-                      Utiliser ce modèle
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/templates">
-                Voir tous les modèles
-              </Link>
-            </Button>
           </div>
         </div>
       </section>
@@ -215,8 +154,8 @@ const Index = () => {
                     1
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold">Choisissez votre modèle</h4>
-                    <p className="text-muted-foreground">Sélectionnez le type de contrat qui correspond à votre besoin parmi notre bibliothèque de modèles.</p>
+                    <h4 className="text-lg font-semibold">Accédez au générateur</h4>
+                    <p className="text-muted-foreground">Rendez-vous sur notre page de génération de contrat pour commencer.</p>
                   </div>
                 </div>
                 

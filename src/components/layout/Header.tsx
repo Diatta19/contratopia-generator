@@ -1,146 +1,160 @@
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { FileText, Menu, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const Header = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 py-4 px-6 transition-all duration-300",
-        isScrolled
-          ? "glass-effect backdrop-blur-md border-b"
-          : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
+        {
+          "bg-white/80 backdrop-blur-md shadow-sm": scrolled || isOpen,
+          "bg-transparent": !scrolled && !isOpen,
+        }
       )}
     >
-      <div className="container mx-auto max-w-7xl">
+      <div className="container mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-blue-600 font-medium"
-          >
-            <FileText className="w-5 h-5" />
-            <span className="text-lg font-medium">ContratPro</span>
+          <Link to="/" className="flex items-center">
+            <span className="text-xl font-bold tracking-tight text-blue-600">
+              ContratPro
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                isActive("/")
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-primary"
+              )}
             >
               Accueil
             </Link>
             <Link
               to="/generate"
-              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                isActive("/generate")
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-primary"
+              )}
             >
-              Créer un contrat
+              Générer
             </Link>
             <Link
-              to="#"
-              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+              to="/dashboard"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                isActive("/dashboard")
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-primary"
+              )}
             >
-              Modèles
+              Dashboard
             </Link>
-            <Link
-              to="#"
-              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
-            >
-              Tarifs
-            </Link>
-            <Link
-              to="#"
-              className="text-sm text-foreground/70 hover:text-foreground transition-colors"
-            >
-              Contact
-            </Link>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" asChild>
-              <Link to="/generate">Commencer</Link>
-            </Button>
           </nav>
 
-          {/* Mobile menu toggle */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Button asChild>
+              <Link to="/generate">Créer un contrat</Link>
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-foreground"
-            onClick={toggleMobileMenu}
-            aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            className="md:hidden focus:outline-none"
+            onClick={toggleMenu}
+            aria-label="Toggle Menu"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
-      <div
-        className={cn(
-          "fixed inset-0 top-[72px] z-40 bg-background/95 backdrop-blur-sm transform transition-transform duration-300 ease-in-out",
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        <div className="container mx-auto p-6 flex flex-col gap-6 text-center">
-          <Link
-            to="/"
-            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Accueil
-          </Link>
-          <Link
-            to="/generate"
-            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Créer un contrat
-          </Link>
-          <Link
-            to="#"
-            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Modèles
-          </Link>
-          <Link
-            to="#"
-            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Tarifs
-          </Link>
-          <Link
-            to="#"
-            className="py-3 text-foreground hover:text-blue-600 transition-colors text-lg"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Contact
-          </Link>
-          <Button className="mt-4 bg-blue-600 hover:bg-blue-700" asChild>
-            <Link to="/generate" onClick={() => setIsMobileMenuOpen(false)}>
-              Commencer
-            </Link>
-          </Button>
+      {isOpen && (
+        <div className="md:hidden bg-white border-t">
+          <div className="container mx-auto px-6 py-4">
+            <nav className="flex flex-col space-y-4">
+              <Link
+                to="/"
+                className={cn(
+                  "text-sm font-medium py-2 transition-colors",
+                  isActive("/") ? "text-primary" : "text-muted-foreground"
+                )}
+                onClick={closeMenu}
+              >
+                Accueil
+              </Link>
+              <Link
+                to="/generate"
+                className={cn(
+                  "text-sm font-medium py-2 transition-colors",
+                  isActive("/generate") ? "text-primary" : "text-muted-foreground"
+                )}
+                onClick={closeMenu}
+              >
+                Générer
+              </Link>
+              <Link
+                to="/dashboard"
+                className={cn(
+                  "text-sm font-medium py-2 transition-colors",
+                  isActive("/dashboard") ? "text-primary" : "text-muted-foreground"
+                )}
+                onClick={closeMenu}
+              >
+                Dashboard
+              </Link>
+              <Button
+                className="w-full justify-center mt-2"
+                asChild
+              >
+                <Link to="/generate" onClick={closeMenu}>
+                  Créer un contrat
+                </Link>
+              </Button>
+            </nav>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };

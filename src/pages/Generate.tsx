@@ -1,16 +1,10 @@
 
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ContractForm from "@/components/ContractForm";
 import ContractPreview from "@/components/ContractPreview";
 import { Toaster } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import AuthModal from "@/components/auth/AuthModal";
-import { Button } from "@/components/ui/button";
-import { UserCircle } from "lucide-react";
-import { contractTemplates } from "@/data/contractTemplates";
 
 interface ContractData {
   contractType: string;
@@ -38,42 +32,6 @@ interface ContractData {
 
 const Generate = () => {
   const [contractData, setContractData] = useState<ContractData | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const { currentUser } = useAuth();
-  const location = useLocation();
-
-  useEffect(() => {
-    const state = location.state as any;
-    
-    // Handle contract data from previous state
-    if (state?.contractData) {
-      setContractData(state.contractData);
-    }
-    
-    // Handle template selection
-    if (state?.templateId) {
-      const selectedTemplate = contractTemplates.find(
-        template => template.id === state.templateId
-      );
-      
-      if (selectedTemplate) {
-        setContractData(selectedTemplate.templateData);
-      }
-      
-      // Remove templateId from browser history to prevent reloading the template on page refresh
-      window.history.replaceState({}, document.title);
-    }
-    
-    // Handle payment success
-    if (state?.paymentSuccess && state?.selectedOption) {
-      sessionStorage.setItem('paymentSuccess', 'true');
-      sessionStorage.setItem('paymentOption', state.selectedOption);
-      
-      window.dispatchEvent(new Event('storage'));
-      
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
 
   const handleFormSubmit = (data: ContractData) => {
     setContractData(data);
@@ -92,21 +50,10 @@ const Generate = () => {
       
       <main className="flex-1 pt-24 pb-16">
         <div className="container mx-auto max-w-7xl px-6 py-8">
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">
               Générez votre contrat
             </h1>
-            
-            {currentUser ? (
-              <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full">
-                <UserCircle className="h-5 w-5" />
-                <span className="text-sm font-medium">{currentUser.email}</span>
-              </div>
-            ) : (
-              <Button onClick={() => setShowAuthModal(true)}>
-                Connexion / Inscription
-              </Button>
-            )}
           </div>
           
           <div className="text-center mb-12">
@@ -129,7 +76,6 @@ const Generate = () => {
       
       <Footer />
       <Toaster />
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   );
 };
