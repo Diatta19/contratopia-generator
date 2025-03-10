@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -24,45 +23,6 @@ const features = [
     description: "Adaptez chaque contrat à vos besoins spécifiques avec nos options de personnalisation.",
     icon: <FileText className="h-5 w-5" />,
   },
-];
-
-const contractTemplates = [
-  {
-    id: 1,
-    title: "Contrat de prestation de service",
-    description: "Idéal pour les freelances et consultants proposant des services.",
-    image: "/lovable-uploads/e49af7c4-b475-4344-b25f-fedf5ece490a.png"
-  },
-  {
-    id: 2,
-    title: "Contrat de travail CDI",
-    description: "Pour établir une relation d'emploi à durée indéterminée conforme au droit.",
-    image: "/lovable-uploads/056e5996-57ab-428b-b0ff-d66f5f0167ac.png"
-  },
-  {
-    id: 3,
-    title: "Contrat de bail commercial",
-    description: "Encadre la location d'un local à usage professionnel ou commercial.",
-    image: "/lovable-uploads/439eaccd-7f11-4c2a-9b85-1c9de108cf8f.png"
-  },
-  {
-    id: 4,
-    title: "Contrat de vente",
-    description: "Sécurise les transactions entre vendeurs et acheteurs.",
-    image: "/lovable-uploads/b7ae53b0-09b9-4e5a-a8b7-9d581160839d.png"
-  },
-  {
-    id: 5,
-    title: "Accord de confidentialité",
-    description: "Protège les informations sensibles échangées entre parties.",
-    image: "/lovable-uploads/473b3ec1-c30f-4634-b5c9-b700422e9626.png"
-  },
-  {
-    id: 6,
-    title: "Contrat de partenariat",
-    description: "Encadre la collaboration entre deux ou plusieurs parties pour un projet commun.",
-    image: "/lovable-uploads/dc3cefa8-0b03-4692-b9a5-41c099597f81.png"
-  }
 ];
 
 const Index = () => {
