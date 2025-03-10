@@ -9,6 +9,7 @@ import Generate from "./pages/Generate";
 import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 import PaymentDetails from "./pages/PaymentDetails";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/generate" element={<Generate />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/payment-details" element={<PaymentDetails />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
